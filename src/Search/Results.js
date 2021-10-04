@@ -1,38 +1,30 @@
-import styled from 'styled-components'
-import Result from './Result'
+import Result from './Result';
+import { FlexColumn, Link, ResultsList } from './styles';
 
-const ResultsList = styled.ol`
-  width: 100%;
-  margin: 30px 0 0;
-  padding: 0;
-  list-style-type: none;
-`
-
-const Link = styled.a`
-  color: #767676;
-
-  &:hover {
-    color: #02a95c;
-  }
-`
-
-const Results = ({ campaigns: { query, hits, nbHits } }) => {
+const Results = ({ campaigns: { hits, nbHits, query } }) => {
   return (
-    <ResultsList>
+    <FlexColumn
+      style={{
+        flex: '0 0 50%'
+      }}
+    >
       <div
         style={{
-          paddingBottom: '1.6rem'
+          padding: '1.6rem 0'
         }}
       >
         <Link href={`https://www.gofundme.com/s?q=${query}`} target="_blank">
-          See all {nbHits.toLocaleString()} campaigns
+          See all {nbHits?.toLocaleString()} campaigns
         </Link>
       </div>
-      {hits.map(hit => (
-        <Result result={hit} />
-      ))}
-    </ResultsList>
-  )
-}
 
-export default Results
+      <ResultsList>
+        {hits?.map(hit => (
+          <Result key={`result-${hit?.objectID}`} result={hit} />
+        ))}
+      </ResultsList>
+    </FlexColumn>
+  );
+};
+
+export default Results;

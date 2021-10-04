@@ -1,65 +1,93 @@
-import { useRef, useState } from 'react'
-import styled from 'styled-components'
-import debounce from 'lodash.debounce'
-import { useQuery } from 'react-query'
-import { fetchSearchResults } from './API'
-import Results from './Results'
-import SearchSvg from './icon_search.svg'
+import { useEffect, useRef, useState } from 'react';
+import debounce from 'lodash.debounce';
+import Results from './Results';
+import RelatedSearches from './RelatedSearches';
+import { fetchSearchResults } from './API';
+import {
+  CancelSearchIcon,
+  Error,
+  FlexColumn,
+  FlexRow,
+  SearchIcon,
+  SearchInput
+} from './styles';
 
-const SearchIcon = styled.img.attrs({
-  src: SearchSvg
-})`
-  position: absolute;
-  left: 0.6rem;
-  top: calc(50% - 8px);
-  width: 16px;
-  height: 16px;
-`
-
-const SearchInput = styled.input`
-  height: 36px;
-  width: 400px;
-  padding: 0 10px 0 30px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-`
+const initialDataState = {
+  isFetching: false,
+  hasError: false,
+  results: []
+};
 
 const Search = () => {
-  const inputRef = useRef(null)
-  const [searchText, setSearchText] = useState('')
+  const inputRef = useRef(null);
+  const controllerRef = useRef(null);
+  const [searchText, setSearchText] = useState('');
+  const [data, setData] = useState(initialDataState);
 
-  const {
-    isFetching,
-    data: { results }
-  } = useQuery(
-    ['gofundme-search-results', { searchText }],
-    () => fetchSearchResults(searchText),
-    {
-      enabled: searchText.length > 0,
-      initialData: {
-        results: []
+  useEffect(() => {
+    const search = async () => {
+      setData(d => ({ ...data, ...{ isFetching: true, hasError: false } }));
+
+      if (controllerRef.current) {
+        controllerRef.current.abort();
       }
+      const controller = new AbortController();
+      controllerRef.current = controller;
+
+      try {
+        const { results } = await fetchSearchResults(
+          searchText,
+          controllerRef.current?.signal
+        );
+
+        setData({
+          isFetching: false,
+          results
+        });
+
+        controllerRef.current = null;
+      } catch (e) {
+        setData(d => ({ ...data, ...{ isFetching: false, hasError: true } }));
+      }
+    };
+
+    if (searchText.trim().length > 0) {
+      search();
     }
-  )
+  }, [searchText]);
+
+  const onCancelSearchClick = () => {
+    setData(initialDataState);
+    setSearchText('');
+    inputRef.current.value = '';
+  };
 
   const onInputChange = debounce(e => {
-    setSearchText(inputRef.current.value)
-  }, 200)
+    setSearchText(inputRef.current.value);
+  }, 100);
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column'
-      }}
-    >
-      <div style={{ position: 'relative' }}>
+    <FlexColumn>
+      <div style={{ position: 'relative', width: 'max-content' }}>
         <SearchIcon />
         <SearchInput ref={inputRef} onChange={onInputChange} />
+        {searchText.trim().length > 0 && (
+          <CancelSearchIcon onClick={onCancelSearchClick} />
+        )}
       </div>
-      {!isFetching && results.length > 0 && <Results campaigns={results[0]} />}
-    </div>
-  )
-}
+      {!data.isFetching && data.results.length > 0 && (
+        <FlexRow style={{ alignItems: 'flex-start' }}>
+          <Results campaigns={data.results[0]} />
+          <RelatedSearches searches={data.results[1]} />
+        </FlexRow>
+      )}
+      {data.hasError && (
+        <Error>
+          Oops! It seems we are having trouble with your search at the moment.
+        </Error>
+      )}
+    </FlexColumn>
+  );
+};
 
-export default Search
+export default Search;
