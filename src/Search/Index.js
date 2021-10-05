@@ -26,7 +26,10 @@ const Search = () => {
 
   useEffect(() => {
     const search = async () => {
-      setData(d => ({ ...data, ...{ isFetching: true, hasError: false } }));
+      setData(oldData => ({
+        ...oldData,
+        ...{ isFetching: true, hasError: false }
+      }));
 
       if (controllerRef.current) {
         controllerRef.current.abort();
@@ -47,7 +50,10 @@ const Search = () => {
 
         controllerRef.current = null;
       } catch (e) {
-        setData(d => ({ ...data, ...{ isFetching: false, hasError: true } }));
+        setData(oldData => ({
+          ...oldData,
+          ...{ isFetching: false, hasError: true }
+        }));
       }
     };
 
@@ -62,7 +68,7 @@ const Search = () => {
     inputRef.current.value = '';
   };
 
-  const onInputChange = debounce(e => {
+  const onInputChange = debounce(() => {
     setSearchText(inputRef.current.value);
   }, 100);
 
@@ -70,15 +76,22 @@ const Search = () => {
     <FlexColumn>
       <div style={{ position: 'relative', width: 'max-content' }}>
         <SearchIcon />
-        <SearchInput ref={inputRef} onChange={onInputChange} />
+        <SearchInput
+          ref={inputRef}
+          placeholder="Find fundraisers by name or location"
+          onChange={onInputChange}
+        />
         {searchText.trim().length > 0 && (
-          <CancelSearchIcon onClick={onCancelSearchClick} />
+          <CancelSearchIcon
+            onClick={onCancelSearchClick}
+            aria-label="Cancel search"
+          />
         )}
       </div>
       {!data.isFetching && data.results.length > 0 && (
         <FlexRow style={{ alignItems: 'flex-start' }}>
           <Results campaigns={data.results[0]} />
-          <RelatedSearches searches={data.results[1]} />
+          <RelatedSearches relatedData={data.results[1]} />
         </FlexRow>
       )}
       {data.hasError && (

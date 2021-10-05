@@ -1,4 +1,5 @@
 export const fetchSearchResults = async (searchText, signal) => {
+  const url = `https://e7phe9bb38-dsn.algolia.net/1/indexes/*/queries`;
   const requests = [
     {
       indexName: 'prod_funds_feed_replica_1',
@@ -12,27 +13,17 @@ export const fetchSearchResults = async (searchText, signal) => {
     }
   ];
 
-  const url = `https://e7phe9bb38-dsn.algolia.net/1/indexes/*/queries`;
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'x-algolia-api-key': '447d82ac9832ffcf05fb432dcb65bd08',
+      'x-algolia-application-id': 'E7PHE9BB38'
+    },
+    body: JSON.stringify({
+      requests
+    }),
+    signal
+  });
 
-  try {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        Host: 'e7phe9bb38-dsn.algolia.net',
-        'Sec-Fetch-Dest': 'empty',
-        'Sec-Fetch-Mode': 'cors',
-        'Sec-Fetch-Site': 'cross-site',
-        'x-algolia-api-key': '447d82ac9832ffcf05fb432dcb65bd08',
-        'x-algolia-application-id': 'E7PHE9BB38'
-      },
-      body: JSON.stringify({
-        requests
-      }),
-      signal
-    });
-
-    return await response.json();
-  } catch (err) {
-    throw err;
-  }
+  return await response.json();
 };

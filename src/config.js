@@ -1,7 +1,8 @@
 export const colors = Object.freeze({
-  goFundMeGreen: '#02a95c',
+  listItemBackground: '#f7f7f7',
   darkGray: '#767676',
+  goFundMeGreen: '#02a95c',
   lightGray: '#ccc',
-  victoria: '#243646',
-  notificationRed: '#FF5252'
+  notificationRed: '#FF5252',
+  victoria: '#243646'
 });

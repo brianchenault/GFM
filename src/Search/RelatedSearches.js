@@ -1,7 +1,7 @@
 import parse from 'html-react-parser';
 import { FlexColumn, RelatedSearchesList, ResultSearchesItem } from './styles';
 
-const RelatedSearches = ({ searches: { hits } }) => {
+const RelatedSearches = ({ relatedData: { hits } }) => {
   return hits.length > 0 ? (
     <FlexColumn
       style={{
@@ -11,8 +11,8 @@ const RelatedSearches = ({ searches: { hits } }) => {
     >
       <h2>Related Searches</h2>
       <RelatedSearchesList>
-        {hits.map(({ _highlightResult, query }) => (
-          <ResultSearchesItem>
+        {hits.map(({ _highlightResult, query, objectID }) => (
+          <ResultSearchesItem key={`related-search-${objectID}`}>
             <a
               href={`https://www.gofundme.com/s?q=${query}`}
               rel="noreferrer"
