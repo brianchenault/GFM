@@ -5,6 +5,7 @@ import { colors } from '../config';
 
 export const CampaignTitle = styled.div`
   margin-bottom: 0.4em;
+  color: ${colors.victoria};
 `;
 
 export const CancelSearchIcon = styled.button`
